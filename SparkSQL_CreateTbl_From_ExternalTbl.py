@@ -1,5 +1,18 @@
+######################
+#  CREATE ORC TABLE  #
+######################
+# methode 1 (OK)
+# CREATE TABLE STORED AS ORC & INSERT INTO
+CREATE TABLE city_orc(cityid int, cityname string) STORED AS ORC;
+INSERT INTO TABLE city_orc SELECT * FROM city;
+
+# methode 2 (OK)
+# CREATE TABLE AS SELECT STORED AS ORC
+CREATE TABLE imsi_orc STORED AS ORC AS select * from imsi ;
+
 # methode 1 (marche pas)
-# 1) create table
+# create table & LOAD DATA INPATH
+# 1) create table 
 spark.sql("CREATE TABLE IF NOT EXISTS test.purchase_history_internal (UID string, DAY string, CATEGORY int, TOTAL float) USING hive")
 
 # 2) load data
@@ -12,6 +25,7 @@ spark.sql("LOAD DATA LOCAL INPATH 'hdfs:///tmp/CDNOW_clean.csv' INTO TABLE test.
 # --------------------------------------
 
 # methode 2 (OK)
+# CREATE TABLE & INSERT SELECT
 # create table
 spark.sql("CREATE TABLE IF NOT EXISTS test.purchase_history_internal (UID string, DAY string, CATEGORY int, TOTAL float) USING hive")
 # insert data from external table
@@ -19,6 +33,7 @@ spark.sql("INSERT OVERWRITE TABLE test.purchase_history_internal SELECT * FROM t
 
 
 # methode 3 (OK)
+# CREATE TABLE AS SELECT
 # create hive internal table as select from a hive external table
 spark.sql("CREATE TABLE IF NOT EXISTS test.purchase_history_internal2 as select * from test.purchase_history")
 
@@ -33,6 +48,7 @@ spark.sql("SELECT DISTINCT category FROM test.purchase_history_internal2 ORDER B
 
 # create a datamart(calculé) from hive table
 spark.sql("CREATE TABLE IF NOT EXISTS test.purchase_cat_amont as SELECT category,COUNT(*) AS quantity FROM test.purchase_history GROUP BY category ORDER BY category")
+
 
 # methode 4 (OK) ------------------------------------
 # from one source table insert multi dest tables
